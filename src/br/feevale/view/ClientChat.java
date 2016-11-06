@@ -340,7 +340,7 @@ public class ClientChat extends JFrame {
 				
 //				/System.out.println( "-> " + JsonMesangem.toString() + " <-");
 				 
-				writer.println(JsonMensagem.get("Usuario") + JsonMensagem.get("Usuario") + " diz:" + JsonMensagem.get("Mensagem") + ":" + "Chat");
+				writer.println(JsonMensagem.get("Usuario") + " diz:" + JsonMensagem.get("Mensagem") + ":" + "Chat");
 				writer.flush();
 				
 				//System.out.printf("Envia mensagem");
