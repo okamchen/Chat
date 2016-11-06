@@ -21,14 +21,12 @@ public class ChatService extends JFrame {
 	ArrayList clientOutputStreams;
 	ArrayList<String> users;
 
-	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private JButton btnLimpar;
 	private JButton btnFim;
 	private JButton btnInicio;
 	private JButton btnUsuarios;
 	private JScrollPane jScrollPane1;
 	private JTextArea taChat;
-	// End of variables declaration//GEN-END:variables
 
 	public class ClientHandler implements Runnable {
 		BufferedReader reader;
@@ -42,7 +40,7 @@ public class ChatService extends JFrame {
 				InputStreamReader isReader = new InputStreamReader(sock.getInputStream());
 				reader = new BufferedReader(isReader);
 			} catch (Exception ex) {
-				taChat.append("Unexpected error... \n");
+				taChat.append("Error... \n");
 			}
 
 		}
@@ -65,16 +63,16 @@ public class ChatService extends JFrame {
 						log((data[0] + ":" + data[1] + ":" + chat));
 						userAdd(data[0]);
 					} else if (data[2].equals(disconnect)) {
-						log((data[0] + ": est√° desconectado." + ":" + chat));
+						log((data[0] + ": est· desconectado." + ":" + chat));
 						userRemove(data[0]);
 					} else if (data[2].equals(chat)) {
 						log(message);
 					} else {
-						taChat.append("Nenhum condi√ß√£o encontrada. \n");
+						taChat.append("Nenhum condiÁ„o encontrada. \n");
 					}
 				}
 			} catch (Exception ex) {
-				taChat.append("Perda de conex√£o. \n");
+				taChat.append("Perda de conex„o. \n");
 				ex.printStackTrace();
 				clientOutputStreams.remove(client);
 			}
@@ -103,28 +101,28 @@ public class ChatService extends JFrame {
 		taChat.setRows(5);
 		jScrollPane1.setViewportView(taChat);
 
-		btnInicio.setText("START");
+		btnInicio.setText("Iniciar");
 		btnInicio.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				b_startActionPerformed(evt);
 			}
 		});
 
-		btnFim.setText("END");
+		btnFim.setText("Fim");
 		btnFim.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				b_endActionPerformed(evt);
 			}
 		});
 
-		btnUsuarios.setText("Online Users");
+		btnUsuarios.setText("Usu·rios Online");
 		btnUsuarios.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				b_usersActionPerformed(evt);
 			}
 		});
 
-		btnLimpar.setText("Clear");
+		btnLimpar.setText("Limpar");
 		btnLimpar.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				b_clearActionPerformed(evt);
@@ -182,8 +180,8 @@ public class ChatService extends JFrame {
 			Thread.currentThread().interrupt();
 		}
 
-		log("Server: est√° parado e todos os usu√°rios est√£o desconectados.\n:Chat");
-		taChat.append("Server stopping... \n");
+		log("Server: est· parado e todos os usu·rios est„o desconectados.\n:Chat");
+		taChat.append("Parando Server... \n");
 
 		taChat.setText("");
 	}
@@ -196,7 +194,7 @@ public class ChatService extends JFrame {
 	}
 
 	private void b_usersActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_b_usersActionPerformed
-		taChat.append("\n Usu√°rios online : \n");
+		taChat.append("\n Usu·rios online : \n");
 		for (String current_user : users) {
 			taChat.append(current_user);
 			taChat.append("\n");
@@ -232,7 +230,7 @@ public class ChatService extends JFrame {
 
 					Thread listener = new Thread(new ClientHandler(clientSock, writer));
 					listener.start();
-					taChat.append("Feita conex√£o. \n");
+					taChat.append("Feita conex„o. \n");
 				}
 			} catch (Exception ex) {
 				taChat.append("Error ao conectar. \n");

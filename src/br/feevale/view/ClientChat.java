@@ -7,7 +7,10 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -19,6 +22,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle;
 import javax.swing.WindowConstants;
+
+import br.feevale.bibliotecas.*; 
 
 public class ClientChat extends JFrame {
 
@@ -63,7 +68,7 @@ public class ClientChat extends JFrame {
 	}
 
 	public void removerUsuario(String usuario) {
-		taChat.append(usuario + " estÃ¡ offline.\n");
+		taChat.append(usuario + " está offline.\n");
 	}
 
 	public void writeUsers() {
@@ -72,12 +77,12 @@ public class ClientChat extends JFrame {
 	}
 
 	public void enviarDesconexao() {
-		String bye = (usuario + ": :Disconnect");
+		String bye = (usuario + ": :Disconectou");
 		try {
 			writer.println(bye);
 			writer.flush();
 		} catch (Exception e) {
-			taChat.append("Erro ao enviar mensagem de desconexÃ£o.\n");
+			taChat.append("Erro ao enviar mensagem de desconexão.\n");
 		}
 	}
 
@@ -106,7 +111,7 @@ public class ClientChat extends JFrame {
 			try {
 				while ((stream = reader.readLine()) != null) {
 					data = stream.split(":");
-
+					
 					if (data[2].equals(chat)) {
 						taChat.append(data[0] + ": " + data[1] + "\n");
 						taChat.setCaretPosition(taChat.getDocument().getLength());
@@ -116,12 +121,12 @@ public class ClientChat extends JFrame {
 					} else if (data[2].equals(disconnect)) {
 						removerUsuario(data[0]);
 					} else if (data[2].equals(done)) {
-						// users.setText("");
 						writeUsers();
 						usuarios.clear();
 					}
 				}
 			} catch (Exception ex) {
+				System.out.print("Error" + ex.getMessage());
 			}
 		}
 	}
@@ -161,7 +166,7 @@ public class ClientChat extends JFrame {
             }
         });
 
-		lblUsuario.setText("UsuÃ¡rio :");
+		lblUsuario.setText("Usuário :");
 		txtUsuario.addActionListener(new ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtUsuarioActionPerformed(evt);
@@ -186,10 +191,14 @@ public class ClientChat extends JFrame {
 		taChat.setRows(5);
 		jScrollPane1.setViewportView(taChat);
 
-		btnEnviar.setText("SEND");
+		btnEnviar.setText("Enviar");
 		btnEnviar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
-				enviarMsg(evt);
+				try {
+					enviarMsg(evt);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
 			}
 		});
 
@@ -279,18 +288,18 @@ public class ClientChat extends JFrame {
 				InputStreamReader streamreader = new InputStreamReader(sock.getInputStream());
 				reader = new BufferedReader(streamreader);
 				writer = new PrintWriter(sock.getOutputStream());
-				writer.println(usuario + ": estÃ¡ conectado.:Connect");
+				writer.println(usuario + ": está conectado.:Connect");
 				writer.flush();
 				isConnected = true;
 			} catch (Exception ex) {
-				taChat.append("Erro de conexÃ£o! Tente novamente. \n");
+				taChat.append("Erro de conexão! Tente novamente. \n");
 				txtUsuario.setEditable(true);
 			}
 
 			ListenThread();
 
 		} else if (isConnected == true) {
-			taChat.append("VocÃª jÃ¡ estÃ¡ conectado. \n");
+			taChat.append("Você já está conectado. \n");
 		}
 	}
 
@@ -299,15 +308,43 @@ public class ClientChat extends JFrame {
 		desconectar();
 	}
 
-	private void enviarMsg(ActionEvent evt) {
+	private void enviarMsg(ActionEvent evt) throws JSONException {
+	
 		String nothing = "";
 		if ((txtChat.getText()).equals(nothing)) {
 			txtChat.setText("");
 			txtChat.requestFocus();
+			System.out.printf("nothing");
 		} else {
 			try {
-				writer.println(usuario + ":" + txtChat.getText() + ":" + "Chat");
+				
+				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+				Calendar cal = Calendar.getInstance();
+				JSONObject JsonMensagem = new JSONObject();
+				JSONObject arquivo = new JSONObject();
+				
+				if (txtChat.getText() != null) {
+					JsonMensagem.put("Mensagem", txtChat.getText());
+					arquivo.put("Nome", "");
+					arquivo.put("Conteudo", "");
+					arquivo.put("Tipo", "");
+				} else {
+					// Adiciona informaçoes do arquivo.
+					JsonMensagem.put("Mensagem", "");
+				}
+				
+				JsonMensagem.put("DataHora", dateFormat.format(cal.get(Calendar.HOUR_OF_DAY)));
+				JsonMensagem.put("Usuario", usuario);
+				JsonMensagem.put("Arquivo", arquivo);
+				
+				
+//				/System.out.println( "-> " + JsonMesangem.toString() + " <-");
+				 
+				writer.println(JsonMensagem.get("Usuario") + JsonMensagem.get("Usuario") + " diz:" + JsonMensagem.get("Mensagem") + ":" + "Chat");
 				writer.flush();
+				
+				//System.out.printf("Envia mensagem");
+				
 			} catch (Exception ex) {
 				taChat.append("Erro ao enviar mensagem. \n");
 			}
