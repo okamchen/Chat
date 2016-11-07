@@ -1,5 +1,6 @@
 package br.feevale.service;
 
+import java.awt.EventQueue;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -7,6 +8,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -16,10 +18,15 @@ import javax.swing.JTextArea;
 import javax.swing.LayoutStyle;
 import javax.swing.WindowConstants;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import br.feevale.util.ProtocoloUtil;
+
 public class ChatService extends JFrame {
 	
 	ArrayList clientOutputStreams;
-	ArrayList<String> users;
+	List<String> usuarios = new ArrayList<String>();
 
 	private JButton btnLimpar;
 	private JButton btnFim;
@@ -47,32 +54,18 @@ public class ChatService extends JFrame {
 
 		@Override
 		public void run() {
-			String message, connect = "Connect", disconnect = "Disconnect", chat = "Chat";
-			String[] data;
-
+			String message;
 			try {
 				while ((message = reader.readLine()) != null) {
-					taChat.append("Recebido: " + message + "\n");
-					data = message.split(":");
+					JSONObject msgJson = ProtocoloUtil.converterMsgJson(message);
 
-					for (String token : data) {
-						taChat.append(token + "\n");
-					}
-
-					if (data[2].equals(connect)) {
-						log((data[0] + ":" + data[1] + ":" + chat));
-						userAdd(data[0]);
-					} else if (data[2].equals(disconnect)) {
-						log((data[0] + ": está desconectado." + ":" + chat));
-						userRemove(data[0]);
-					} else if (data[2].equals(chat)) {
-						log(message);
-					} else {
-						taChat.append("Nenhum condição encontrada. \n");
-					}
+					if (!usuarios.contains(msgJson.get("Usuario"))) {
+						userAdd(msgJson);
+					} 
+					enviarParaClientes(msgJson);
 				}
 			} catch (Exception ex) {
-				taChat.append("Perda de conexão. \n");
+				taChat.append("Perda de conexao. \n");
 				ex.printStackTrace();
 				clientOutputStreams.remove(client);
 			}
@@ -104,28 +97,28 @@ public class ChatService extends JFrame {
 		btnInicio.setText("Iniciar");
 		btnInicio.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				b_startActionPerformed(evt);
+				btnInicioActionPerformed(evt);
 			}
 		});
 
 		btnFim.setText("Fim");
 		btnFim.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				b_endActionPerformed(evt);
+				btnFimActionPerformed(evt);
 			}
 		});
 
-		btnUsuarios.setText("Usuários Online");
+		btnUsuarios.setText("Usuarios Online");
 		btnUsuarios.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				b_usersActionPerformed(evt);
+				btnUsuariosActionPerformed(evt);
 			}
 		});
 
 		btnLimpar.setText("Limpar");
 		btnLimpar.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				b_clearActionPerformed(evt);
+				btnLimparActionPerformed(evt);
 			}
 		});
 
@@ -173,41 +166,41 @@ public class ChatService extends JFrame {
 		pack();
 	}
 
-	private void b_endActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_b_endActionPerformed
+	private void btnFimActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_b_endActionPerformed
 		try {
 			Thread.sleep(5000); // 5000 milliseconds is five second.
 		} catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
 		}
 
-		log("Server: está parado e todos os usuários estão desconectados.\n:Chat");
+		log("Server: estï¿½ parado e todos os usuï¿½rios estï¿½o desconectados.\n:Chat");
 		taChat.append("Parando Server... \n");
 
 		taChat.setText("");
 	}
 
-	private void b_startActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_b_startActionPerformed
+	private void btnInicioActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_b_startActionPerformed
 		Thread starter = new Thread(new ServerStart());
 		starter.start();
 
 		taChat.append("Servidor iniciado...\n");
 	}
 
-	private void b_usersActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_b_usersActionPerformed
-		taChat.append("\n Usuários online : \n");
-		for (String current_user : users) {
+	private void btnUsuariosActionPerformed(java.awt.event.ActionEvent evt) {
+		taChat.append("\n Usuï¿½rios online : \n");
+		for (String current_user : usuarios) {
 			taChat.append(current_user);
 			taChat.append("\n");
 		}
 
 	}
 
-	private void b_clearActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_b_clearActionPerformed
+	private void btnLimparActionPerformed(java.awt.event.ActionEvent evt) {
 		taChat.setText("");
 	}
 
 	public static void main(String args[]) {
-		java.awt.EventQueue.invokeLater(new Runnable() {
+		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
 				new ChatService().setVisible(true);
@@ -219,8 +212,6 @@ public class ChatService extends JFrame {
 		@Override
 		public void run() {
 			clientOutputStreams = new ArrayList();
-			users = new ArrayList<String>();
-
 			try {
 				ServerSocket serverSock = new ServerSocket(2222);
 				while (true) {
@@ -230,7 +221,7 @@ public class ChatService extends JFrame {
 
 					Thread listener = new Thread(new ClientHandler(clientSock, writer));
 					listener.start();
-					taChat.append("Feita conexão. \n");
+					taChat.append("Feita conexao. \n");
 				}
 			} catch (Exception ex) {
 				taChat.append("Error ao conectar. \n");
@@ -238,43 +229,43 @@ public class ChatService extends JFrame {
 		}
 	}
 
-	public void userAdd(String data) {
-		String message, add = ": :Conectado", done = "Server: :Done", name = data;
-		users.add(name);
-		String[] tempList = new String[(users.size())];
-		users.toArray(tempList);
-
-		for (String token : tempList) {
-			message = (token + add);
-			log(message);
-		}
-		log(done);
+	public void userAdd(JSONObject json) throws JSONException {
+		String usuario = json.get("Usuario").toString();
+		usuarios.add(usuario);
+		JSONObject msg = ProtocoloUtil.montaMsgJson(usuario, "Usuario " + usuario + " conectado");
+		enviarParaClientes(msg);
 	}
 
 	public void userRemove(String data) {
-		String message, add = ": Conectado", done = "Server: :Done", name = data;
-		users.remove(name);
-		String[] tempList = new String[(users.size())];
-		users.toArray(tempList);
-
-		for (String token : tempList) {
-			message = (token + add);
-			log(message);
-		}
-		log(done);
+//		String message, add = ": Conectado", done = "Server: :Done", name = data;
+//		usuarios.remove(name);
+//		String[] tempList = new String[(usuarios.size())];
+//		usuarios.toArray(tempList);
+//
+//		for (String token : tempList) {
+//			message = (token + add);
+//			log(message);
+//		}
+//		log(done);
 	}
 
 	public void log(String message) {
+		taChat.append("Registro: " + message + "\n");
+		taChat.setCaretPosition(taChat.getDocument().getLength());
+	}
+	
+	public void enviarParaClientes(JSONObject json) {
 		Iterator it = clientOutputStreams.iterator();
-
+		log(json.toString());
+		
 		while (it.hasNext()) {
 			try {
 				PrintWriter writer = (PrintWriter) it.next();
-				writer.println(message);
-				taChat.append("Enviado: " + message + "\n");
+//				if(!usuarios.contains(json.get("Usuario"))){
+					writer.println(json.toString());
+//				}
 				writer.flush();
-				taChat.setCaretPosition(taChat.getDocument().getLength());
-
+				
 			} catch (Exception ex) {
 				taChat.append("Error ao escrever o log. \n");
 			}
