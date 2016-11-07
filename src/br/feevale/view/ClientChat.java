@@ -15,6 +15,7 @@ import java.util.Calendar;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
@@ -48,6 +49,7 @@ public class ClientChat extends JFrame {
 	private JTextField txtChat;
 	private JTextField txtPorta;
 	private JTextField txtUsuario;
+	private JFileChooser btAnexar;
 
 	public static void main(String args[]) {
 		EventQueue.invokeLater(new Runnable() {
@@ -145,6 +147,7 @@ public class ClientChat extends JFrame {
 		taChat = new JTextArea();
 		txtChat = new JTextField();
 		btnEnviar = new JButton();
+		btAnexar = new JFileChooser();
 
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setTitle("Chat Java");
@@ -201,6 +204,17 @@ public class ClientChat extends JFrame {
 				}
 			}
 		});
+		
+		//btAnexar.setToolTipText("Anexar");
+		btAnexar.setBounds(20, 30, 200, 30);
+		btAnexar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+
 
 
 		GroupLayout layout = new GroupLayout(getContentPane());
