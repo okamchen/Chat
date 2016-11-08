@@ -173,7 +173,7 @@ public class ChatService extends JFrame {
 			Thread.currentThread().interrupt();
 		}
 
-		log("Server: est� parado e todos os usu�rios est�o desconectados.\n:Chat");
+		log("Server: esta parado e todos os usu�rios estao desconectados.\n:Chat");
 		taChat.append("Parando Server... \n");
 
 		taChat.setText("");
@@ -187,7 +187,7 @@ public class ChatService extends JFrame {
 	}
 
 	private void btnUsuariosActionPerformed(java.awt.event.ActionEvent evt) {
-		taChat.append("\n Usu�rios online : \n");
+		taChat.append("\n Usuarios online : \n");
 		for (String current_user : usuarios) {
 			taChat.append(current_user);
 			taChat.append("\n");
@@ -232,8 +232,6 @@ public class ChatService extends JFrame {
 	public void userAdd(JSONObject json) throws JSONException {
 		String usuario = json.get("Usuario").toString();
 		usuarios.add(usuario);
-		JSONObject msg = ProtocoloUtil.montaMsgJson(usuario, "Usuario " + usuario + " conectado");
-		enviarParaClientes(msg);
 	}
 
 	public void userRemove(String data) {
@@ -261,11 +259,8 @@ public class ChatService extends JFrame {
 		while (it.hasNext()) {
 			try {
 				PrintWriter writer = (PrintWriter) it.next();
-//				if(!usuarios.contains(json.get("Usuario"))){
-					writer.println(json.toString());
-//				}
+				writer.println(json.toString());
 				writer.flush();
-				
 			} catch (Exception ex) {
 				taChat.append("Error ao escrever o log. \n");
 			}

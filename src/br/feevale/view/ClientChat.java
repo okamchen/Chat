@@ -7,7 +7,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -29,7 +28,6 @@ import br.feevale.util.ProtocoloUtil;
 public class ClientChat extends JFrame {
 
 	String usuario, url = "localhost";
-	ArrayList<String> usuarios = new ArrayList<String>();
 	int porta = 2222;
 	Boolean isConnected = false;
 
@@ -65,17 +63,8 @@ public class ClientChat extends JFrame {
 		incomingReader.start();
 	}
 
-	public void addUsuario(String data) {
-		usuarios.add(data);
-	}
-
 	public void removerUsuario(String usuario) {
-		taChat.append(usuario + " est� offline.\n");
-	}
-
-	public void writeUsers() {
-		String[] tempList = new String[(usuarios.size())];
-		usuarios.toArray(tempList);
+		taChat.append(usuario + " esta offline.\n");
 	}
 
 	public void enviarDesconexao() {
@@ -123,9 +112,9 @@ public class ClientChat extends JFrame {
 
 		private void exibirMsg(JSONObject json) {
 			try {
-//				if(!usuarios.contains(json.get("Usuario"))){
-				taChat.append(json.get("Usuario").toString() + ": " + json.get("Mensagem").toString() + "\n");
-//				}
+				if(!usuario.equals(json.get("Usuario").toString())){
+					taChat.append(json.get("Usuario").toString() + ": " + json.get("Mensagem").toString() + "\n");
+				}
 			} catch (JSONException e) {
 				System.out.println("Erro ao ler mensagem de json (Client)");
 				e.printStackTrace();
@@ -281,20 +270,18 @@ public class ClientChat extends JFrame {
 		if (isConnected == false) {
 			usuario = txtUsuario.getText();
 			txtUsuario.setEditable(false);
-			
-			if(!usuarios.contains(usuario)){
-				usuarios.add(usuario);
-			}
 
 			try {
 				sock = new Socket(url, porta);
 				InputStreamReader streamreader = new InputStreamReader(sock.getInputStream());
 				reader = new BufferedReader(streamreader);
 				writer = new PrintWriter(sock.getOutputStream());
+				JSONObject msgJson = ProtocoloUtil.montaMsgJson(usuario, " conectado.");
+				writer.println(msgJson.toString());
 				writer.flush();
 				isConnected = true;
 			} catch (Exception ex) {
-				taChat.append("Erro de conex�o! Tente novamente. \n");
+				taChat.append("Erro de conexao! Tente novamente. \n");
 				txtUsuario.setEditable(true);
 			}
 
