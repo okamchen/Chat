@@ -11,6 +11,7 @@ import java.net.Socket;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
+import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -41,13 +42,15 @@ public class ClientChat extends JFrame {
 	private JScrollPane jScrollPane1;
 	private JLabel lblUrl;
 	private JLabel lblPorta;
+	private JLabel lblAnexo;
 	private JLabel lblUsuario;
 	private JTextArea taChat;
 	private JTextField txtUrl;
 	private JTextField txtChat;
 	private JTextField txtPorta;
+	private JTextField txtCaminhoArq;
 	private JTextField txtUsuario;
-	private JFileChooser btAnexar;
+	private JButton btnAnexar;
 
 	public static void main(String args[]) {
 		EventQueue.invokeLater(new Runnable() {
@@ -68,13 +71,13 @@ public class ClientChat extends JFrame {
 	}
 
 	public void enviarDesconexao() {
-//		String bye = (usuario + ": :Disconectou");
-//		try {
-//			writer.println(bye);
-//			writer.flush();
-//		} catch (Exception e) {
-//			taChat.append("Erro ao enviar mensagem de desconex�o.\n");
-//		}
+		// String bye = (usuario + ": :Disconectou");
+		// try {
+		// writer.println(bye);
+		// writer.flush();
+		// } catch (Exception e) {
+		// taChat.append("Erro ao enviar mensagem de desconex�o.\n");
+		// }
 	}
 
 	public void desconectar() {
@@ -94,14 +97,14 @@ public class ClientChat extends JFrame {
 	}
 
 	public class IncomingReader implements Runnable {
-		
+
 		@Override
 		public void run() {
 			String stream;
 
 			try {
 				while ((stream = reader.readLine()) != null) {
-					
+
 					JSONObject msgJson = ProtocoloUtil.converterMsgJson(stream);
 					exibirMsg(msgJson);
 				}
@@ -112,7 +115,7 @@ public class ClientChat extends JFrame {
 
 		private void exibirMsg(JSONObject json) {
 			try {
-				if(!usuario.equals(json.get("Usuario").toString())){
+				if (!usuario.equals(json.get("Usuario").toString())) {
 					taChat.append(json.get("Usuario").toString() + ": " + json.get("Mensagem").toString() + "\n");
 				}
 			} catch (JSONException e) {
@@ -127,7 +130,9 @@ public class ClientChat extends JFrame {
 		lblUrl = new JLabel();
 		txtUrl = new JTextField();
 		lblPorta = new JLabel();
+		lblAnexo = new JLabel();
 		txtPorta = new JTextField();
+		txtCaminhoArq = new JTextField();
 		lblUsuario = new JLabel();
 		txtUsuario = new JTextField();
 		btnConextar = new JButton();
@@ -136,17 +141,20 @@ public class ClientChat extends JFrame {
 		taChat = new JTextArea();
 		txtChat = new JTextField();
 		btnEnviar = new JButton();
-		btAnexar = new JFileChooser();
+		btnAnexar = new JButton();
 
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setTitle("Chat Java");
 		setResizable(false);
-		
+
 		lblUrl.setText("URL : ");
 		txtUrl.setText("localhost");
 
 		lblPorta.setText("Porta :");
 		txtPorta.setText("2222");
+
+		lblAnexo.setText("Caminho: ");
+		txtCaminhoArq.setText("");
 
 		lblUsuario.setText("Usuario :");
 
@@ -178,91 +186,84 @@ public class ClientChat extends JFrame {
 				}
 			}
 		});
-		
-		//btAnexar.setToolTipText("Anexar");
-		btAnexar.setBounds(20, 30, 200, 30);
-		btAnexar.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				// TODO Auto-generated method stub
-				
+
+		btnAnexar.setText("Anexar");
+		btnAnexar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				anexarAquivo(evt);
 			}
-			
 		});
-
-
 
 		GroupLayout layout = new GroupLayout(getContentPane());
 		getContentPane().setLayout(layout);
 
-		layout.setHorizontalGroup(layout.createParallelGroup(Alignment.LEADING)
+		layout.setHorizontalGroup(layout
+				.createParallelGroup(
+						Alignment.LEADING)
 				.addGroup(
 						layout.createSequentialGroup().addContainerGap()
-								.addGroup(layout
-										.createParallelGroup(Alignment.LEADING).addGroup(layout
-												.createSequentialGroup().addComponent(txtChat,
-														GroupLayout.PREFERRED_SIZE,
-														352, GroupLayout.PREFERRED_SIZE)
-												.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-												.addComponent(btnEnviar, GroupLayout.DEFAULT_SIZE, 111,
-														Short.MAX_VALUE))
-										.addComponent(jScrollPane1)
-										.addGroup(layout.createSequentialGroup().addGroup(layout
-												.createParallelGroup(Alignment.TRAILING, false)
-												.addComponent(lblUsuario, GroupLayout.DEFAULT_SIZE, 62,
-														Short.MAX_VALUE)
-												.addComponent(lblUrl, GroupLayout.DEFAULT_SIZE,
-														GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-												.addGap(18, 18, 18)
-												.addGroup(layout
-														.createParallelGroup(Alignment.LEADING,
-																false)
-														.addComponent(txtUrl, GroupLayout.DEFAULT_SIZE, 89,
-																Short.MAX_VALUE)
-														.addComponent(txtUsuario))
-												.addGap(18, 18, 18)
-												.addGroup(layout
-														.createParallelGroup(Alignment.LEADING,
-																false)
-														.addComponent(lblPorta, GroupLayout.DEFAULT_SIZE,
-																GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-												.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-												.addGroup(layout.createParallelGroup(
-														Alignment.LEADING, false).addComponent(
-																txtPorta, GroupLayout.DEFAULT_SIZE, 50,
-																Short.MAX_VALUE))
-												.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-												.addGroup(layout
-														.createParallelGroup(Alignment.LEADING)
-														.addGroup(
-																layout.createSequentialGroup().addComponent(btnConextar)
-																		.addGap(2, 2, 2).addComponent(btnDesconctar)
+								.addGroup(layout.createParallelGroup(Alignment.LEADING)
+										.addGroup(layout.createSequentialGroup()
+												.addComponent(txtChat, GroupLayout.PREFERRED_SIZE, 500,
+														GroupLayout.PREFERRED_SIZE)
+												.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addComponent(
+														btnEnviar, GroupLayout.DEFAULT_SIZE, 111, Short.MAX_VALUE))
+										.addComponent(jScrollPane1).addGroup(
+												layout.createSequentialGroup()
+														.addGroup(layout.createParallelGroup(Alignment.TRAILING, false)
+																.addComponent(lblUsuario, GroupLayout.DEFAULT_SIZE, 62,
+																		Short.MAX_VALUE)
+																.addComponent(lblUrl, GroupLayout.DEFAULT_SIZE,
+																		GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+														.addGap(18, 18, 18)
+														.addGroup(layout.createParallelGroup(Alignment.LEADING, false)
+																.addComponent(txtUrl, GroupLayout.DEFAULT_SIZE, 89,
+																		Short.MAX_VALUE)
+																.addComponent(txtUsuario))
+														.addGap(18, 18, 18)
+														.addGroup(layout.createParallelGroup(Alignment.LEADING, false)
+																.addComponent(lblPorta, GroupLayout.DEFAULT_SIZE,
+																		GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+														.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+														.addGroup(layout.createParallelGroup(Alignment.LEADING, false)
+																.addComponent(txtPorta, GroupLayout.DEFAULT_SIZE, 50,
+																		Short.MAX_VALUE))
+														.addPreferredGap(
+																LayoutStyle.ComponentPlacement.RELATED)
+														.addGroup(layout.createParallelGroup(Alignment.LEADING)
+																.addGroup(layout.createSequentialGroup()
+																		.addComponent(btnConextar).addGap(2, 2, 2)
+																		.addComponent(btnDesconctar).addGap(2, 2, 2)
+																		.addGap(0, 0, Short.MAX_VALUE)))
+														.addPreferredGap(
+																LayoutStyle.ComponentPlacement.RELATED)
+														.addGroup(layout.createParallelGroup(Alignment.LEADING)
+																.addGroup(layout.createSequentialGroup()
+																		.addComponent(btnAnexar).addGap(2, 2, 2)
+																		.addComponent(txtCaminhoArq)
 																		.addGap(0, 0, Short.MAX_VALUE)))))
 								.addContainerGap())
-				.addGroup(Alignment.TRAILING,
-						layout.createSequentialGroup()
-								.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-								.addGap(201, 201, 201)));
+				.addGroup(Alignment.TRAILING, layout.createSequentialGroup()
+						.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addGap(201, 201, 201)));
 
-		layout.setVerticalGroup(layout.createParallelGroup(Alignment.LEADING).addGroup(layout
-				.createSequentialGroup().addContainerGap()
-				.addGroup(layout.createParallelGroup(Alignment.BASELINE).addComponent(lblUrl)
-						.addComponent(txtUrl, GroupLayout.PREFERRED_SIZE,
-								GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-						.addComponent(lblPorta).addComponent(txtPorta, GroupLayout.PREFERRED_SIZE,
-								GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-				.addGroup(layout.createParallelGroup(Alignment.LEADING, false)
-						.addComponent(txtUsuario)
-						.addGroup(layout.createParallelGroup(Alignment.BASELINE)
-								.addComponent(lblUsuario).addComponent(btnConextar)
-								.addComponent(btnDesconctar)))
-				.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-				.addComponent(jScrollPane1, GroupLayout.PREFERRED_SIZE, 310,
-						GroupLayout.PREFERRED_SIZE)
-				.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-				.addGroup(layout.createParallelGroup(Alignment.LEADING).addComponent(txtChat)
-						.addComponent(btnEnviar, GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE))
-				.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)));
+		layout.setVerticalGroup(layout.createParallelGroup(Alignment.LEADING)
+				.addGroup(layout.createSequentialGroup().addContainerGap()
+						.addGroup(layout.createParallelGroup(Alignment.BASELINE).addComponent(lblUrl)
+								.addComponent(txtUrl, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+										GroupLayout.PREFERRED_SIZE)
+								.addComponent(lblPorta).addComponent(txtPorta, GroupLayout.PREFERRED_SIZE,
+										GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+						.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+						.addGroup(layout.createParallelGroup(Alignment.LEADING, false).addComponent(txtUsuario)
+								.addGroup(layout.createParallelGroup(Alignment.BASELINE).addComponent(lblUsuario)
+										.addComponent(btnConextar).addComponent(txtCaminhoArq).addComponent(btnAnexar)
+										.addComponent(btnDesconctar)))
+						.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+						.addComponent(jScrollPane1, GroupLayout.PREFERRED_SIZE, 310, GroupLayout.PREFERRED_SIZE)
+						.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+						.addGroup(layout.createParallelGroup(Alignment.LEADING).addComponent(txtChat)
+								.addComponent(btnEnviar, GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE))
+						.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)));
 		pack();
 	}
 
@@ -298,13 +299,13 @@ public class ClientChat extends JFrame {
 	}
 
 	private void enviarMsg(ActionEvent evt) throws JSONException {
-	
-		if (this.existeMensagemParaEnviar(txtChat.getText())){
+
+		if (this.existeMensagemParaEnviar(txtChat.getText())) {
 			try {
 				JSONObject msgJson = ProtocoloUtil.montaMsgJson(usuario, txtChat.getText());
 				writer.println(msgJson.toString());
 				writer.flush();
-				
+
 			} catch (Exception ex) {
 				taChat.append("Erro ao enviar mensagem. \n");
 			}
@@ -313,18 +314,22 @@ public class ClientChat extends JFrame {
 		}
 		this.resetarCamposEnvio();
 	}
-	
-	private boolean existeMensagemParaEnviar(String msg){
-		if(msg.equals("")){
+
+	private void anexarAquivo(ActionEvent evt) {
+		JColorChooser chooser = new JColorChooser();
+	}
+
+	private boolean existeMensagemParaEnviar(String msg) {
+		if (msg.equals("")) {
 			this.resetarCamposEnvio();
 			return false;
 		}
 		return true;
 	}
 
-	private void resetarCamposEnvio(){
+	private void resetarCamposEnvio() {
 		txtChat.setText("");
 		txtChat.requestFocus();
 	}
-	
+
 }
