@@ -20,8 +20,8 @@ import javax.swing.JTextField;
 import javax.swing.LayoutStyle;
 import javax.swing.WindowConstants;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import br.feevale.bibliotecas.JSONException;
+import br.feevale.bibliotecas.JSONObject;
 
 import br.feevale.util.ProtocoloUtil;
 
