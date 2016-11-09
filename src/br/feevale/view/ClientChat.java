@@ -15,13 +15,18 @@ import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle;
 import javax.swing.WindowConstants;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 
-import org.json.*;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import br.feevale.util.ProtocoloUtil;
 
@@ -49,7 +54,7 @@ public class ClientChat extends JFrame {
 	private JTextField txtPorta;
 	private JTextField txtCaminhoArq;
 	private JTextField txtUsuario;
-	private JFileChooser btnAnexar;
+	private JButton btnAnexar;
 
 	public static void main(String args[]) {
 		EventQueue.invokeLater(new Runnable() {
@@ -140,8 +145,7 @@ public class ClientChat extends JFrame {
 		taChat = new JTextArea();
 		txtChat = new JTextField();
 		btnEnviar = new JButton();
-		
-		btnAnexar = new JFileChooser();
+		btnAnexar = new JButton();
 
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setTitle("Chat Java");
@@ -187,12 +191,12 @@ public class ClientChat extends JFrame {
 			}
 		});
 
-		btnAnexar.setToolTipText("Anexar");
-		//btnAnexar.addActionListener(new ActionListener() {
-		//	public void actionPerformed(ActionEvent evt) {
-		//		anexarAquivo(evt);
-		//	}
-		//});
+		btnAnexar.setText("Anexar");
+		btnAnexar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				anexarAquivo(evt);
+			}
+		});
 
 		GroupLayout layout = new GroupLayout(getContentPane());
 		getContentPane().setLayout(layout);
@@ -316,7 +320,40 @@ public class ClientChat extends JFrame {
 	}
 
 	private void anexarAquivo(ActionEvent evt) {
-		JColorChooser chooser = new JColorChooser();
+		JFileChooser fc = new JFileChooser(new File("C:\\"));
+		fc.setDialogTitle("Anexar Arquivo");
+		int resultado = fc.showSaveDialog(null);
+		
+		if (resultado == JFileChooser.APPROVE_OPTION) {
+			File fi = fc.getSelectedFile(); // Pega o caminho do arquivo.
+			System.out.printf("Caminho do arquivo: " + fi);
+			
+			if (fi.exists() == true) {
+				System.out.print("Arquivo carregado com sucesso");
+			} else {
+				System.out.print("Falha ao carregar arquivo.");
+			}
+			
+			int len = (int)fi.length();
+			byte[] arquivoByte = new byte[len];
+			FileInputStream inputFile  = null;
+		     
+			try {
+				FileWriter fw = new FileWriter(fi.getPath());
+				fw.flush();
+				fw.close(); 
+				
+				inputFile = new FileInputStream(fi);         
+				inputFile.read(arquivoByte, 0, len);  
+				
+				System.out.print(arquivoByte);
+				System.out.print(inputFile.read(arquivoByte, 0, len));
+				
+			} catch (Exception e) {
+				System.out.printf(e.getMessage());
+			}
+		}
+		
 	}
 
 	private boolean existeMensagemParaEnviar(String msg) {
