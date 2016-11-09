@@ -86,8 +86,8 @@ public class ChatService extends JFrame {
 		btnLimpar = new JButton();
 
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		setTitle("Chat - Server's frame");
-		setName("server"); // NOI18N
+		setTitle("Chat Server");
+		setName("server");
 		setResizable(false);
 
 		taChat.setColumns(20);
@@ -234,7 +234,7 @@ public class ChatService extends JFrame {
 		usuarios.add(usuario);
 	}
 
-	public void userRemove(String data) {
+	public void userRemove(String usuario) {
 //		String message, add = ": Conectado", done = "Server: :Done", name = data;
 //		usuarios.remove(name);
 //		String[] tempList = new String[(usuarios.size())];
