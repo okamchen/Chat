@@ -3,7 +3,14 @@ package br.feevale.view;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -11,7 +18,6 @@ import java.net.Socket;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
-import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -21,16 +27,13 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle;
 import javax.swing.WindowConstants;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import br.feevale.util.ProtocoloUtil;
 
-public class ClientChat extends JFrame {
+public class ChatClient extends JFrame {
 
 	String usuario, url = "localhost";
 	int porta = 2222;
@@ -46,13 +49,11 @@ public class ClientChat extends JFrame {
 	private JScrollPane jScrollPane1;
 	private JLabel lblUrl;
 	private JLabel lblPorta;
-	private JLabel lblAnexo;
 	private JLabel lblUsuario;
 	private JTextArea taChat;
 	private JTextField txtUrl;
 	private JTextField txtChat;
 	private JTextField txtPorta;
-	private JTextField txtCaminhoArq;
 	private JTextField txtUsuario;
 	private JButton btnAnexar;
 
@@ -60,7 +61,7 @@ public class ClientChat extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				new ClientChat().setVisible(true);
+				new ChatClient().setVisible(true);
 			}
 		});
 	}
@@ -96,7 +97,7 @@ public class ClientChat extends JFrame {
 
 	}
 
-	public ClientChat() {
+	public ChatClient() {
 		inicializarTela();
 	}
 
@@ -120,12 +121,54 @@ public class ClientChat extends JFrame {
 		private void exibirMsg(JSONObject json) {
 			try {
 				if (!usuario.equals(json.get("Usuario").toString())) {
+					this.verificarExistenciaArquivo(json);
 					taChat.append(json.get("Usuario").toString() + ": " + json.get("Mensagem").toString() + "\n");
 				}
 			} catch (JSONException e) {
 				System.out.println("Erro ao ler mensagem de json (Client)");
 				e.printStackTrace();
 			}
+		}
+
+		private void verificarExistenciaArquivo(JSONObject json) {
+			try {
+				if(json.get("Arquivo") != null && json.get("Arquivo").toString() != null){
+					JSONObject arquivoJson = new JSONObject(json.get("Arquivo").toString());
+					if(arquivoJson.get("Conteudo") != null){
+						StringBuilder nomeArq = new StringBuilder(arquivoJson.get("Nome").toString());
+						nomeArq.append(".").append(arquivoJson.get("Tipo").toString());
+						int dialogResult = JOptionPane.showConfirmDialog (null, "Deseja efetuar do arquivo '" + nomeArq.toString() + "' ? ","Warning", 2);
+						if(dialogResult == JOptionPane.YES_OPTION){
+							baixarArquivo(arquivoJson, nomeArq);
+						}
+					}
+				}
+			} catch (JSONException e) {
+				System.out.println("Mensagem não contém arquivo.");
+			} catch (FileNotFoundException e) {
+				System.out.println("Diretório não encontrado ou sem permissão.");
+			} catch (IOException e) {
+				System.out.println("Erro ao gravar arquivo.");
+				e.printStackTrace();
+			}
+		}
+
+		private void baixarArquivo(JSONObject arquivoJson, StringBuilder nomeArq)
+				throws FileNotFoundException, JSONException, IOException {
+			FileOutputStream fos = new FileOutputStream("/home/kone/Downloads/" + nomeArq.toString());
+			BufferedOutputStream bos = new BufferedOutputStream(fos);
+			byte[] bytes = (byte[]) arquivoJson.get("Conteudo");
+			int current = bytes.length;
+			int bytesReabytes = 0;
+			do {
+				bytesReabytes = bytes.length;
+				if(current >= 0){
+					current += current;
+				}
+			} while(current > -1);
+			
+			bos.write(bytes, 0 , current);
+			bos.flush();
 		}
 	}
 
@@ -134,9 +177,7 @@ public class ClientChat extends JFrame {
 		lblUrl = new JLabel();
 		txtUrl = new JTextField();
 		lblPorta = new JLabel();
-		lblAnexo = new JLabel();
 		txtPorta = new JTextField();
-		txtCaminhoArq = new JTextField();
 		lblUsuario = new JLabel();
 		txtUsuario = new JTextField();
 		btnConextar = new JButton();
@@ -156,9 +197,6 @@ public class ClientChat extends JFrame {
 
 		lblPorta.setText("Porta :");
 		txtPorta.setText("2222");
-
-		lblAnexo.setText("Caminho: ");
-		txtCaminhoArq.setText("");
 
 		lblUsuario.setText("Usuario :");
 
@@ -192,6 +230,7 @@ public class ClientChat extends JFrame {
 		});
 
 		btnAnexar.setText("Anexar");
+		btnAnexar.setEnabled(false);
 		btnAnexar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				anexarAquivo(evt);
@@ -244,7 +283,6 @@ public class ClientChat extends JFrame {
 														.addGroup(layout.createParallelGroup(Alignment.LEADING)
 																.addGroup(layout.createSequentialGroup()
 																		.addComponent(btnAnexar).addGap(2, 2, 2)
-																		.addComponent(txtCaminhoArq)
 																		.addGap(0, 0, Short.MAX_VALUE)))))
 								.addContainerGap())
 				.addGroup(Alignment.TRAILING, layout.createSequentialGroup()
@@ -260,7 +298,7 @@ public class ClientChat extends JFrame {
 						.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
 						.addGroup(layout.createParallelGroup(Alignment.LEADING, false).addComponent(txtUsuario)
 								.addGroup(layout.createParallelGroup(Alignment.BASELINE).addComponent(lblUsuario)
-										.addComponent(btnConextar).addComponent(txtCaminhoArq).addComponent(btnAnexar)
+										.addComponent(btnConextar).addComponent(btnAnexar)
 										.addComponent(btnDesconctar)))
 						.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
 						.addComponent(jScrollPane1, GroupLayout.PREFERRED_SIZE, 310, GroupLayout.PREFERRED_SIZE)
@@ -275,6 +313,7 @@ public class ClientChat extends JFrame {
 		if (isConnected == false) {
 			usuario = txtUsuario.getText();
 			txtUsuario.setEditable(false);
+			btnAnexar.setEnabled(true);
 
 			try {
 				sock = new Socket(url, porta);
@@ -353,12 +392,16 @@ public class ClientChat extends JFrame {
 				System.out.printf(e.getMessage());
 			}
 		}
+//		String path = "/home/kone/Imagens/8213e2b9121b11c16d18a02e2899d724.jpg";
+//		
+//		JSONObject msgJson = ProtocoloUtil.montaMsgJson(usuario, txtChat.getText(), path);
+//		writer.println(msgJson.toString());
+//		writer.flush();
 		
 	}
 
 	private boolean existeMensagemParaEnviar(String msg) {
 		if (msg.equals("")) {
-			this.resetarCamposEnvio();
 			return false;
 		}
 		return true;
