@@ -364,40 +364,12 @@ public class ChatClient extends JFrame {
 		int resultado = fc.showSaveDialog(null);
 		
 		if (resultado == JFileChooser.APPROVE_OPTION) {
-			File fi = fc.getSelectedFile(); // Pega o caminho do arquivo.
-			System.out.printf("Caminho do arquivo: " + fi);
+			File file = fc.getSelectedFile(); 
 			
-			if (fi.exists() == true) {
-				System.out.print("Arquivo carregado com sucesso");
-			} else {
-				System.out.print("Falha ao carregar arquivo.");
-			}
-			
-			int len = (int)fi.length();
-			byte[] arquivoByte = new byte[len];
-			FileInputStream inputFile  = null;
-		     
-			try {
-				FileWriter fw = new FileWriter(fi.getPath());
-				fw.flush();
-				fw.close(); 
-				
-				inputFile = new FileInputStream(fi);         
-				inputFile.read(arquivoByte, 0, len);  
-				
-				System.out.print(arquivoByte);
-				System.out.print(inputFile.read(arquivoByte, 0, len));
-				
-			} catch (Exception e) {
-				System.out.printf(e.getMessage());
-			}
+			JSONObject msgJson = ProtocoloUtil.montaMsgJson(usuario, txtChat.getText(), file.getPath());
+			writer.println(msgJson.toString());
+			writer.flush();
 		}
-//		String path = "/home/kone/Imagens/8213e2b9121b11c16d18a02e2899d724.jpg";
-//		
-//		JSONObject msgJson = ProtocoloUtil.montaMsgJson(usuario, txtChat.getText(), path);
-//		writer.println(msgJson.toString());
-//		writer.flush();
-		
 	}
 
 	private boolean existeMensagemParaEnviar(String msg) {

@@ -1,8 +1,9 @@
 package br.feevale.util;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -36,17 +37,13 @@ public abstract class ProtocoloUtil {
 		return obj;
 	}
 	
-	private static String getTypeArq(String pathArq) {
-		return pathArq.substring(pathArq.lastIndexOf(".") + 1);
+	private static String getTypeArq(String path) {
+		return path.substring(path.lastIndexOf(".") + 1);
 	}
 
-	private static String getBytesArq(String pathArq) throws IOException {
-		File file = new File(pathArq); 
-		byte[] bFile = new byte[(int) file.length()];
-		FileInputStream fileInputStream = new FileInputStream(file);
-		fileInputStream.read(bFile);
-		fileInputStream.close();
-		return bFile.toString();
+	private static byte[] getBytesArq(String path) throws IOException {
+		Path pathArq = Paths.get(path);
+		return Files.readAllBytes(pathArq);
 	}
 
 	private static String getNameArq(String pathArq) {
