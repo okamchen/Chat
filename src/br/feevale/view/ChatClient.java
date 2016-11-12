@@ -5,15 +5,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.util.Base64;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -121,8 +123,8 @@ public class ChatClient extends JFrame {
 		private void exibirMsg(JSONObject json) {
 			try {
 				if (!usuario.equals(json.get("Usuario").toString())) {
-					this.verificarExistenciaArquivo(json);
 					taChat.append(json.get("Usuario").toString() + ": " + json.get("Mensagem").toString() + "\n");
+					this.verificarExistenciaArquivo(json);
 				}
 			} catch (JSONException e) {
 				System.out.println("Erro ao ler mensagem de json (Client)");
@@ -155,20 +157,12 @@ public class ChatClient extends JFrame {
 
 		private void baixarArquivo(JSONObject arquivoJson, StringBuilder nomeArq)
 				throws FileNotFoundException, JSONException, IOException {
-			FileOutputStream fos = new FileOutputStream("/home/kone/Downloads/" + nomeArq.toString());
+			FileOutputStream fos = new FileOutputStream("/home/kone/Imagens/teste/enviados/" + nomeArq.toString());
 			BufferedOutputStream bos = new BufferedOutputStream(fos);
-			byte[] bytes = (byte[]) arquivoJson.get("Conteudo");
-			int current = bytes.length;
-			int bytesReabytes = 0;
-			do {
-				bytesReabytes = bytes.length;
-				if(current >= 0){
-					current += current;
-				}
-			} while(current > -1);
-			
-			bos.write(bytes, 0 , current);
+			byte[] fileBytes = Base64.getDecoder().decode(arquivoJson.get("Conteudo").toString());
+			bos.write(fileBytes,0 , Integer.valueOf(arquivoJson.get("Tamanho").toString()));
 			bos.flush();
+			taChat.append("Recebido arquivo com sucesso. \n");
 		}
 	}
 
@@ -324,6 +318,7 @@ public class ChatClient extends JFrame {
 				writer.println(msgJson.toString());
 				writer.flush();
 				isConnected = true;
+				taChat.setText(usuario +": Conectado." + "\n");
 			} catch (Exception ex) {
 				taChat.append("Erro de conexao! Tente novamente. \n");
 				txtUsuario.setEditable(true);
@@ -352,7 +347,7 @@ public class ChatClient extends JFrame {
 			} catch (Exception ex) {
 				taChat.append("Erro ao enviar mensagem. \n");
 			}
-			txtChat.setText("");
+			taChat.append(txtUsuario.getText() + ": " + txtChat.getText() + "\n");
 			txtChat.requestFocus();
 		}
 		this.resetarCamposEnvio();
@@ -366,7 +361,8 @@ public class ChatClient extends JFrame {
 		if (resultado == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile(); 
 			
-			JSONObject msgJson = ProtocoloUtil.montaMsgJson(usuario, txtChat.getText(), file.getPath());
+			JSONObject msgJson = ProtocoloUtil.montaMsgJson(usuario, "Enviado arquivo jooow.", file.getPath());
+			taChat.append("Enviado arquivo.\n");
 			writer.println(msgJson.toString());
 			writer.flush();
 		}

@@ -6,6 +6,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Base64;
+import java.util.Base64.Decoder;
 import java.util.Calendar;
 
 import org.json.JSONException;
@@ -21,8 +23,9 @@ public abstract class ProtocoloUtil {
 			if(pathArq != null){
 				
 				arq.put( "Nome", getNameArq(pathArq) );
-				arq.put( "Conteudo", getBytesArq(pathArq));
 				arq.put( "Tipo", getTypeArq(pathArq));
+				arq.put( "Conteudo", getBytesArq(pathArq));
+				arq.put( "Tamanho", getSizeOfBytes(pathArq));
 				obj.put( "Arquivo", arq );
 			}
 			obj.put( "Mensagem", msg );
@@ -37,13 +40,21 @@ public abstract class ProtocoloUtil {
 		return obj;
 	}
 	
+	private static int getSizeOfBytes(String path) throws IOException {
+		Path pathArq = Paths.get(path);
+		byte[] bytesArq = Files.readAllBytes(pathArq);
+		return bytesArq.length;
+	}
+
 	private static String getTypeArq(String path) {
 		return path.substring(path.lastIndexOf(".") + 1);
 	}
 
-	private static byte[] getBytesArq(String path) throws IOException {
+	private static String getBytesArq(String path) throws IOException {
 		Path pathArq = Paths.get(path);
-		return Files.readAllBytes(pathArq);
+		byte[] bytesArq = Files.readAllBytes(pathArq);
+		
+		return Base64.getEncoder().encodeToString(bytesArq);
 	}
 
 	private static String getNameArq(String pathArq) {
